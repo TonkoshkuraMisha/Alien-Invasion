@@ -6,4 +6,5 @@ class Settings():
         self.screen_width = 1080
         self.screen_height = 680
         self.bg_color = (0, 200, 0)
-        # Салатовый - (85, 225, 20). Небесный - (204, 229, 255)
+        # Настройки корабля.
+        self.ship_speed = 1.8
