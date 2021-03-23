@@ -1,8 +1,9 @@
 import sys
-
+from time import sleep
 import pygame
 
 from settings import Settings
+from game_stats import GameStats
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
@@ -16,11 +17,20 @@ class AlienInvasion:
 
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.settings.screen_width = self.screen.get_rect().width
-        self.settings.screen_height = self.screen.get_rect().height
+        self.screen = pygame.display.set_mode(
+            (0, 0), pygame.FULLSCREEN)
+            #(self.settings.screen_width, 
+            #self.settings.screen_height))
+        # для полноэкранного режима нужно применить:
+        # (0, 0), pygame.FULLSCREEN) - вставить в set_mode
+        # self.settings.screen_width = self.screen.get_rect().width
+        # self.settings.screen_height = self.screen.get_rect().height
+        self.bg_img = pygame.image.load('images/backgraunds/471785.jpg')
         pygame.display.set_caption("Alien Invasion")
-        
+
+        # Создание экземпляра для хранения игровой статистики.
+        self.stats = GameStats(self)
+
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
@@ -89,14 +99,33 @@ class AlienInvasion:
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
 
-        # Проверка попадания в пришельца.
-        # При обнаружении попадания удалить снаряд и пришельца.
+        self._check_bullet_alien_collisions()
+
+    def _check_bullet_alien_collisions(self):
+        """Обработка коллизий снарядов с пришельцами."""
+        # Удаление снарядов и пришельцев, учавствующих в коллизиях.
         collisions = pygame.sprite.groupcollide(
                 self.bullets, self.aliens, True, True)
         if not self.aliens:
             # Уничтожение существующих снарядов и создание нового флота.
             self.bullets.empty()
             self._create_fleet()
+
+    def _ship_hit(self):
+        """Обрабатывает столкновение корабля с пришельцем."""
+        # Уменьшение ships_left.
+        self.stats.ships_left -= 1
+
+        # Очистка списков пришельцев и снарядов.
+        self.aliens.empty()
+        self.bullets.empty()
+
+        # Создание нового флота и размещение корабля в центре.
+        self._create_fleet()
+        self.ship.center_ship()
+
+        # Пауза.
+        sleep(1)
 
     def _update_aliens(self):
         """
@@ -105,6 +134,10 @@ class AlienInvasion:
         """
         self._check_fleet_edges()
         self.aliens.update()
+
+        # Проверка коллизий "Пришелец - корабль."
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            self._ship_hit()
 
 
     def _create_fleet(self):
@@ -151,7 +184,8 @@ class AlienInvasion:
 
     def _update_screen(self):
         """Обновляет изображение на экране и отображает новый экран."""
-        self.screen.fill(self.settings.bg_color)
+        #self.screen.fill(self.settings.bg_color) - однотонный цвет фона!
+        self.screen.blit(self.bg_img, self.bg_img.get_rect())
         self.ship.blitme()
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
