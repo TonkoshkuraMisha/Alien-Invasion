@@ -1,5 +1,6 @@
 import sys
 from time import sleep
+
 import pygame
 
 from settings import Settings
@@ -15,6 +16,10 @@ class AlienInvasion:
         """Инициализирует игру и создаёт игровые ресурсы"""
         pygame.init()
 
+        pygame.mixer.music.load('sound/polet_nad_moskvoj.mp3')
+        pygame.mixer.music.play(loops = -1)
+        self.shot = pygame.mixer.Sound('sound/shots/laser_blast.wav')
+
         self.settings = Settings()
 
         self.screen = pygame.display.set_mode(
@@ -25,7 +30,7 @@ class AlienInvasion:
         # (0, 0), pygame.FULLSCREEN) - вставить в set_mode
         # self.settings.screen_width = self.screen.get_rect().width
         # self.settings.screen_height = self.screen.get_rect().height
-        self.bg_img = pygame.image.load('images/backgraunds/471785.jpg')
+        self.bg_img = pygame.image.load('images/backgraunds/471779_1366_771.jpg')
         pygame.display.set_caption("Alien Invasion")
 
         # Создание экземпляра для хранения игровой статистики.
@@ -71,6 +76,7 @@ class AlienInvasion:
             sys.exit()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
+            self.shot.play()
 
     def _check_keyup_events(self, event):
         """Реагирует на отпускание клавиш."""
@@ -113,19 +119,31 @@ class AlienInvasion:
 
     def _ship_hit(self):
         """Обрабатывает столкновение корабля с пришельцем."""
-        # Уменьшение ships_left.
-        self.stats.ships_left -= 1
+        if self.stats.ships_left > 0:
+            # Уменьшение ships_left.
+            self.stats.ships_left -= 1
 
-        # Очистка списков пришельцев и снарядов.
-        self.aliens.empty()
-        self.bullets.empty()
+            # Очистка списков пришельцев и снарядов.
+            self.aliens.empty()
+            self.bullets.empty()
 
-        # Создание нового флота и размещение корабля в центре.
-        self._create_fleet()
-        self.ship.center_ship()
+            # Создание нового флота и размещение корабля в центре.
+            self._create_fleet()
+            self.ship.center_ship()
 
-        # Пауза.
-        sleep(1)
+            # Пауза.
+            sleep(0.5)
+        else:
+            self.stats.game_active = False
+
+    def _check_aliens_bottom(self):
+        """Проверяет, добрались ли пришельцы до нижнего края экрана."""
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom >= screen_rect.bottom:
+                # Происходит то же, что при столкновении с кораблём.
+                self._ship_hit()
+                break
 
     def _update_aliens(self):
         """
@@ -135,9 +153,12 @@ class AlienInvasion:
         self._check_fleet_edges()
         self.aliens.update()
 
-        # Проверка коллизий "Пришелец - корабль."
+        # Проверка коллизий "пришелец - корабль."
         if pygame.sprite.spritecollideany(self.ship, self.aliens):
             self._ship_hit()
+
+        # Проверить, добрались ли пришельцы до нижнего края экрана.
+        self._check_aliens_bottom()
 
 
     def _create_fleet(self):
