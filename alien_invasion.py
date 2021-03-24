@@ -5,6 +5,7 @@ import pygame
 
 from settings import Settings
 from game_stats import GameStats
+from button import Button
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
@@ -19,6 +20,8 @@ class AlienInvasion:
         pygame.mixer.music.load('sound/polet_nad_moskvoj.mp3')
         pygame.mixer.music.play(loops = -1)
         self.shot = pygame.mixer.Sound('sound/shots/laser_blast.wav')
+        self.button_play = pygame.mixer.Sound('sound/sound_play.wav')
+        self.flight_ship = pygame.mixer.Sound('sound/stinger-rocket.wav')
 
         self.settings = Settings()
 
@@ -42,13 +45,19 @@ class AlienInvasion:
 
         self._create_fleet()
 
+        # Создание кнопки Play.
+        self.play_button = Button(self, "Play")
+
     def run_game(self):
         """Запуск основного цикла игры."""
         while True:
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            self._update_aliens()
+
+            if self.stats.game_active:
+                self.ship.update()
+                self._update_bullets()
+                self._update_aliens()
+
             self._update_screen()
 
 
@@ -61,13 +70,38 @@ class AlienInvasion:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
+                self.button_play.play()
+
+    def _check_play_button(self, mouse_pos):
+        """Запускает новую игру при нажатии кнопки Play."""
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.stats.game_active:
+            # Сброс игровой статистики.
+            self.stats.reset_stats()
+            self.stats.game_active = True
+
+            # Очистка списков пришельцев и снарядов.
+            self.aliens.empty()
+            self.bullets.empty()
+
+            # Создание нового флота и размещение корабля в центре.
+            self._create_fleet()
+            self.ship.center_ship()
+
+            # Указатель мыши скрывается.
+            pygame.mouse.set_visible(False)
 
     def _check_keydown_events(self, event):
         """Реагирует на нажатие клавиш."""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True
+            #self.flight_ship.play()
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
+            #self.flight_ship.play()
         elif event.key == pygame.K_UP:
             self.ship.moving_up = True
         elif event.key == pygame.K_DOWN:
@@ -77,6 +111,11 @@ class AlienInvasion:
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
             self.shot.play()
+        #Пасхалочка для тестировщиков - суперснаряды в два потока!(доделать!)
+        elif event.key == pygame.K_a:
+            self._fire_bullet()
+        elif event.key == pygame.K_s:
+            self._fire_bullet()
 
     def _check_keyup_events(self, event):
         """Реагирует на отпускание клавиш."""
@@ -135,6 +174,7 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.stats.game_active = False
+            pygame.mouse.set_visible(True)
 
     def _check_aliens_bottom(self):
         """Проверяет, добрались ли пришельцы до нижнего края экрана."""
@@ -166,20 +206,21 @@ class AlienInvasion:
         # Создание пришельца и вычисление количества пришельцев в ряду.
         # Интервал между соседними пришельцами равен ширине пришельца.
         alien = Alien(self)
-        alien_width, alien_height = alien.rect.size
+        (alien_width, alien_height) = alien.rect.size
         available_space_x = self.settings.screen_width  - (2 * alien_width)
         number_aliens_x = available_space_x // (2 * alien_width)
 
         """Определяет количество рядов, помещающихся на экране."""
         ship_height = self.ship.rect.height
         available_space_y = (self.settings.screen_height - 
-            (6 * alien_height) - ship_height)
+            (4 * alien_height) - ship_height)
         number_rows = available_space_y // (2 * alien_height)
 
         # Создание флота вторжения.
         for row_number in range(number_rows):
             for alien_number in range(number_aliens_x):
-                self._create_alien(alien_number, row_number)
+                self._create_alien(row_number, alien_number)
+                # alien_number на первом месте, row_number - на втором!
 
     def _create_alien(self, alien_number, row_number):
         """Создание пришельца и размещение его в ряду."""
@@ -211,6 +252,10 @@ class AlienInvasion:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
+
+        # Кнопка Play отображается в том случае, если игра неактивна.
+        if not self.stats.game_active:
+            self.play_button.draw_button()
         
         pygame.display.flip()
 
