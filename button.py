@@ -12,7 +12,7 @@ class Button():
         self.width, self.height = 360, 120
         self.button_color = (25, 140, 255)
         self.text_color = (255, 255, 0)
-        self.font = pygame.font.Font('fonts/COOPBL.TTF', 96)
+        self.font = pygame.font.Font('fonts/unicephalon.ttf', 88)
 
         # Построение объекта rect кнопки и выравнивание по центру экрана.
         self.rect = pygame.Rect(0, 0, self.width, self.height)

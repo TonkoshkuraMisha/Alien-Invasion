@@ -5,6 +5,7 @@ import pygame
 
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import Scoreboard
 from button import Button
 from ship import Ship
 from bullet import Bullet
@@ -17,7 +18,7 @@ class AlienInvasion:
         """Инициализирует игру и создаёт игровые ресурсы"""
         pygame.init()
 
-        pygame.mixer.music.load('sound/polet_nad_moskvoj.mp3')
+        pygame.mixer.music.load('sound/levels/level_1.wav')
         pygame.mixer.music.play(loops = -1)
         self.shot = pygame.mixer.Sound('sound/shots/laser_blast.wav')
         self.button_play = pygame.mixer.Sound('sound/sound_play.wav')
@@ -33,11 +34,12 @@ class AlienInvasion:
         # (0, 0), pygame.FULLSCREEN) - вставить в set_mode
         # self.settings.screen_width = self.screen.get_rect().width
         # self.settings.screen_height = self.screen.get_rect().height
-        self.bg_img = pygame.image.load('images/backgraunds/471779_1366_771.jpg')
+        self.bg_img = pygame.image.load('images/backgraunds/backgraund_1366_768.jpg')
         pygame.display.set_caption("Alien Invasion")
 
-        # Создание экземпляра для хранения игровой статистики.
+        # Создание экземпляра для хранения игровой статистики и результатов игры.
         self.stats = GameStats(self)
+        self.sb = Scoreboard(self)
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -80,8 +82,10 @@ class AlienInvasion:
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.stats.game_active:
             # Сброс игровой статистики.
+            self.settings.initialize_dynamic_settings()
             self.stats.reset_stats()
             self.stats.game_active = True
+            self.sb.prep_score()
 
             # Очистка списков пришельцев и снарядов.
             self.aliens.empty()
@@ -101,11 +105,14 @@ class AlienInvasion:
             #self.flight_ship.play()
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
+        # При включении клавиш вверх-вниз и столкновении на некоторой высоте 
+        # с пришельцами происходит множественная коллизия, которая приводит к тому,
+        # что игра зависает. Нужно доработать.
             #self.flight_ship.play()
-        elif event.key == pygame.K_UP:
-            self.ship.moving_up = True
-        elif event.key == pygame.K_DOWN:
-            self.ship.moving_down = True
+        #elif event.key == pygame.K_UP:
+            #self.ship.moving_up = True
+        #elif event.key == pygame.K_DOWN:
+            #self.ship.moving_down = True
         elif event.key == pygame.K_q:
             sys.exit()
         elif event.key == pygame.K_SPACE:
@@ -151,6 +158,13 @@ class AlienInvasion:
         # Удаление снарядов и пришельцев, учавствующих в коллизиях.
         collisions = pygame.sprite.groupcollide(
                 self.bullets, self.aliens, True, True)
+
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.sb.prep_score()
+            self.sb.check_high_score()
+
         if not self.aliens:
             # Уничтожение существующих снарядов и создание нового флота.
             self.bullets.empty()
@@ -253,6 +267,9 @@ class AlienInvasion:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
+
+        # Вывод информации о счёте.
+        self.sb.show_score()
 
         # Кнопка Play отображается в том случае, если игра неактивна.
         if not self.stats.game_active:
