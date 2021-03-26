@@ -22,7 +22,8 @@ class AlienInvasion:
         pygame.mixer.music.play(loops = -1)
         self.shot = pygame.mixer.Sound('sound/shots/laser_blast.wav')
         self.button_play = pygame.mixer.Sound('sound/sound_play.wav')
-        self.flight_ship = pygame.mixer.Sound('sound/stinger-rocket.wav')
+        #self.flight_ship = pygame.mixer.Sound('sound/stinger-rocket.wav')
+        # звук для движения вправо-влево.
 
         self.settings = Settings()
 
@@ -98,6 +99,11 @@ class AlienInvasion:
             # Указатель мыши скрывается.
             pygame.mouse.set_visible(False)
 
+            # Обновляются значения уровня и количества жизней перед началом
+            # новой игры.
+            self.sb.prep_level()
+            self.sb.prep_ships_left()
+
     def _check_keydown_events(self, event):
         """Реагирует на нажатие клавиш."""
         if event.key == pygame.K_RIGHT:
@@ -171,6 +177,10 @@ class AlienInvasion:
             self._create_fleet()
             self.settings.increase_speed()
 
+            # Увеличение уровня.
+            self.stats.level += 1
+            self.sb.prep_level()
+
     def _ship_hit(self):
         """Обрабатывает столкновение корабля с пришельцем."""
         if self.stats.ships_left > 0:
@@ -184,6 +194,9 @@ class AlienInvasion:
             # Создание нового флота и размещение корабля в центре.
             self._create_fleet()
             self.ship.center_ship()
+
+            # Уменьшает количество жизней.
+            self.sb.prep_ships_left()
 
             # Пауза.
             sleep(0.5)
