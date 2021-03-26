@@ -1,10 +1,14 @@
 import pygame.font
+from pygame.sprite import Group
+
+from ship import Ship
 
 class Scoreboard():
     """Класс для вывода игровой информации."""
 
     def __init__(self, ai_game):
         """Инициализирует атрибуты подсчёта очков."""
+        self.ai_game = ai_game
         self.screen = ai_game.screen
         self.screen_rect = self.screen.get_rect()
         self.settings = ai_game.settings
@@ -15,11 +19,12 @@ class Scoreboard():
         self.text_color_higt_score = (255, 0, 0)
         self.text_color_level = (0, 255, 0)
         self.text_color_ships_left = (255, 255, 0)
-        self.font = pygame.font.Font('fonts/unicephalon.ttf', 28)
+        self.font = pygame.font.Font('fonts/unicephalon.ttf', 24)
         # Подготовка изображений данных.
         self.prep_score()
         self.prep_high_score()
         self.prep_level()
+        self.prep_ships()
         self.prep_ships_left()
 
     def prep_score(self):
@@ -39,7 +44,7 @@ class Scoreboard():
         """Преобразует рекордный счёт в графическое изображение."""
         high_score = round(self.stats.high_score, -1)
         high_score_str = "{:,}".format(high_score)
-        self.high_score_image = self.font.render(f"h-score:{high_score_str}", 
+        self.high_score_image = self.font.render(f"hi-score:{high_score_str}", 
                 True, self.text_color_higt_score)
 
         # Рекорд выравнивается сверху над текущим счётом.
@@ -74,12 +79,23 @@ class Scoreboard():
         self.ships_left_rect.right = self.screen_rect.right - 20
         self.ships_left_rect.top = 100
 
+    def prep_ships(self):
+        """Сообщает количество оставшихся кораблей"""
+        self.ships = Group()
+        for ship_number in range(self.stats.ships_left):
+            ship = Ship(self.ai_game)
+            ship.rect.right = self.screen_rect.right - ship_number*40 + 35
+            #ship.rect.x = self.settings.screen_width - 120 - ship_number*45
+            ship.rect.y = 135
+            self.ships.add(ship)
+
     def show_score(self):
         """Выводит данные игры на экран."""
         self.screen.blit(self.score_image, self.score_rect)
         self.screen.blit(self.high_score_image, self.high_score_rect)
         self.screen.blit(self.level_image, self.level_rect)
         self.screen.blit(self.ships_left_image, self.ships_left_rect)
+        self.ships.draw(self.screen)
 
     def check_high_score(self):
         """Проверяет, появился ли новый рекорд."""

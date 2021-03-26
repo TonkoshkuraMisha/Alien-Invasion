@@ -18,7 +18,7 @@ class AlienInvasion:
         """Инициализирует игру и создаёт игровые ресурсы"""
         pygame.init()
 
-        pygame.mixer.music.load('sound/levels/level_1.wav')
+        pygame.mixer.music.load('sound/intro_normal.wav')
         pygame.mixer.music.play(loops = -1)
         self.shot = pygame.mixer.Sound('sound/shots/laser_blast.wav')
         self.button_play = pygame.mixer.Sound('sound/sound_play.wav')
@@ -27,15 +27,14 @@ class AlienInvasion:
 
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode(
-            (0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
             #(self.settings.screen_width, 
             #self.settings.screen_height))
         # для полноэкранного режима нужно применить:
         # (0, 0), pygame.FULLSCREEN) - вставить в set_mode
         # self.settings.screen_width = self.screen.get_rect().width
         # self.settings.screen_height = self.screen.get_rect().height
-        self.bg_img = pygame.image.load('images/backgraunds/backgraund_1366_768.jpg')
+        self.bg_img = pygame.image.load('images/backgraunds/start_game_1366.jpg')
         pygame.display.set_caption("Alien Invasion")
 
         # Создание экземпляра для хранения игровой статистики и результатов игры.
@@ -68,6 +67,9 @@ class AlienInvasion:
         """Обрабатываются нажатия клавиш и события мыши."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                with open('alien_invasion/hight_score.txt', 'w') as file_object:
+                    file_object.write("Ну и в чём дело?")
+                    file_object.close()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
@@ -102,6 +104,7 @@ class AlienInvasion:
             # Обновляются значения уровня и количества жизней перед началом
             # новой игры.
             self.sb.prep_level()
+            self.sb.prep_ships()
             self.sb.prep_ships_left()
 
     def _check_keydown_events(self, event):
@@ -186,6 +189,7 @@ class AlienInvasion:
         if self.stats.ships_left > 0:
             # Уменьшение ships_left.
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
 
             # Очистка списков пришельцев и снарядов.
             self.aliens.empty()
