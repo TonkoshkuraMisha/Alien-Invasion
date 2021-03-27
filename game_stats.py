@@ -9,9 +9,19 @@ class GameStats():
         # Игра Alien Invasion запукается в неактивном состоянии.
         self.game_active = False
 
+        # Считывание текущего лучшего счёта из файла.
+        hi_score = open('/alien_invasion/hight_score.txt', "r")
+        data = hi_score.read()
+        hi_score.close()
+
         # Рекорд не должен сбрасываться.
         self.score = 0
         self.high_score = 0
+        # Считывание текущего лучшего счёта из файла.
+        hi_score = open('/alien_invasion/hight_score.txt', "r")
+        data = hi_score.read()
+        hi_score.close()
+        self.high_score = int(data)
 
     def reset_stats(self):
         """Инициализирует статистику, изменяющуюся в ходе игры."""

@@ -67,9 +67,6 @@ class AlienInvasion:
         """Обрабатываются нажатия клавиш и события мыши."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                with open('alien_invasion/hight_score.txt', 'w') as file_object:
-                    file_object.write("Ну и в чём дело?")
-                    file_object.close()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
@@ -123,6 +120,8 @@ class AlienInvasion:
         #elif event.key == pygame.K_DOWN:
             #self.ship.moving_down = True
         elif event.key == pygame.K_q:
+            with open('/alien_invasion/hight_score.txt', 'w') as file_object:
+                    file_object.write(str(self.stats.high_score))
             sys.exit()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
@@ -203,7 +202,7 @@ class AlienInvasion:
             self.sb.prep_ships_left()
 
             # Пауза.
-            sleep(0.5)
+            sleep(0.8)
         else:
             self.stats.game_active = False
             pygame.mouse.set_visible(True)
@@ -251,16 +250,16 @@ class AlienInvasion:
         # Создание флота вторжения.
         for row_number in range(number_rows):
             for alien_number in range(number_aliens_x):
-                self._create_alien(row_number, alien_number)
+                self._create_alien(alien_number, row_number)
                 # alien_number на первом месте, row_number - на втором!
 
     def _create_alien(self, alien_number, row_number):
         """Создание пришельца и размещение его в ряду."""
         alien = Alien(self)
         alien_width, alien_height = alien.rect.size
-        alien.x = alien_width + 2 * alien_width * alien_number
+        alien.x = alien_width + 1.5 * alien_width * alien_number
         alien.rect.x = alien.x
-        alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
+        alien.rect.y = alien.rect.height + 1.5 * alien.rect.height * row_number
         self.aliens.add(alien)
 
     def _check_fleet_edges(self):
