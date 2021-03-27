@@ -5,7 +5,7 @@ class Settings():
         # Параметры экрана:
         self.screen_width = 1366
         self.screen_height = 768
-        self.bg_color = (0, 200, 0)
+        #self.bg_color = (0, 200, 0)
         
         # Настройки корабля:
         self.ship_limit = 3
@@ -15,15 +15,15 @@ class Settings():
         self.bullet_height = 24
         self.bullet_color = (255, 255, 0)
         # (255, 255, 0) - цвет надписи Play.
-        self.bullets_allowed = 25
+        self.bullets_allowed = 10
         
         # Настройки пришельцев:
-        self.fleet_drop_speed = 10
+        self.fleet_drop_speed = 12
         
         # Темп ускорения игры
-        self.speedup_scale = 1.05
+        self.speedup_scale = 1.09
         # Темп роста стоимости пришельцев.
-        self.speedup_scale = 1.2
+        self.speedup_scale = 1.09
 
         self.initialize_dynamic_settings()
 

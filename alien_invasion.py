@@ -18,12 +18,21 @@ class AlienInvasion:
         """Инициализирует игру и создаёт игровые ресурсы"""
         pygame.init()
 
-        pygame.mixer.music.load('sound/intro_normal.wav')
-        pygame.mixer.music.play(loops = -1)
         self.shot = pygame.mixer.Sound('sound/shots/laser_blast.wav')
         self.button_play = pygame.mixer.Sound('sound/sound_play.wav')
-        #self.flight_ship = pygame.mixer.Sound('sound/stinger-rocket.wav')
+        self.lost_ship = pygame.mixer.Sound('sound/lost_ship.mp3')
         # звук для движения вправо-влево.
+        self.flight_ship = pygame.mixer.Sound('sound/ultrafast-flare.wav')
+        pygame.mixer.music.load('sound/Carpenter-Brut-Escape-From-Midwich-Valley.wav')
+        pygame.mixer.music.play(loops = -1)
+        #pygame.mixer.music.load('sound/level_1.wav')
+        #pygame.mixer.music.play(loops = 7)
+        #pygame.mixer.music.load('sound/level_2.wav')
+        #pygame.mixer.music.play(loops = 15)
+        #pygame.mixer.music.load('sound/level_3.wav')
+        #pygame.mixer.music.play(loops = -1)
+
+        
 
         self.settings = Settings()
 
@@ -34,7 +43,9 @@ class AlienInvasion:
         # (0, 0), pygame.FULLSCREEN) - вставить в set_mode
         # self.settings.screen_width = self.screen.get_rect().width
         # self.settings.screen_height = self.screen.get_rect().height
-        self.bg_img = pygame.image.load('images/backgraunds/start_game_1366.jpg')
+        self.bg_img = pygame.image.load('images/backgraunds/start_game_1920_1200.jpg')
+        
+        
         pygame.display.set_caption("Alien Invasion")
 
         # Создание экземпляра для хранения игровой статистики и результатов игры.
@@ -97,6 +108,7 @@ class AlienInvasion:
 
             # Указатель мыши скрывается.
             pygame.mouse.set_visible(False)
+            self.bg_img = pygame.image.load('images/backgraunds/Saturn_1920_1030.jpg')
 
             # Обновляются значения уровня и количества жизней перед началом
             # новой игры.
@@ -111,10 +123,10 @@ class AlienInvasion:
             #self.flight_ship.play()
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
+            #self.flight_ship.play()
         # При включении клавиш вверх-вниз и столкновении на некоторой высоте 
         # с пришельцами происходит множественная коллизия, которая приводит к тому,
         # что игра зависает. Нужно доработать.
-            #self.flight_ship.play()
         #elif event.key == pygame.K_UP:
             #self.ship.moving_up = True
         #elif event.key == pygame.K_DOWN:
@@ -174,17 +186,35 @@ class AlienInvasion:
             self.sb.check_high_score()
 
         if not self.aliens:
-            # Уничтожение существующих снарядов и создание нового флота.
-            self.bullets.empty()
-            self._create_fleet()
-            self.settings.increase_speed()
+            self.start_new_level()
 
-            # Увеличение уровня.
-            self.stats.level += 1
-            self.sb.prep_level()
+    def start_new_level(self):
+        # Уничтожение существующих снарядов и создание нового флота.
+        #pygame.init()
+
+        self.bullets.empty()
+        self._create_fleet()
+        self.settings.increase_speed()
+
+        # Увеличение уровня.
+        self.stats.level += 1
+        self.sb.prep_level()
+
+        if self.stats.score <= 20000:
+            self.bg_img = pygame.image.load('images/backgraunds/Saturn_1920_1030.jpg')
+        elif self.stats.score <= 150000:
+            self.bg_img = pygame.image.load('images/backgraunds/Jupiter_1920_1080.jpg')
+        elif self.stats.score <= 300000:
+            self.bg_img = pygame.image.load('images/backgraunds/Mars_1920_1200.jpg')
+        elif self.stats.score <= 500000:
+            self.bg_img = pygame.image.load('images/backgraunds/Moon_1920_1317.jpg')
+        else:
+            self.bg_img = pygame.image.load('images/backgraunds/Earth_1920_1080.jpg')
+
 
     def _ship_hit(self):
         """Обрабатывает столкновение корабля с пришельцем."""
+        self.lost_ship.play()
         if self.stats.ships_left > 0:
             # Уменьшение ships_left.
             self.stats.ships_left -= 1
@@ -202,7 +232,7 @@ class AlienInvasion:
             self.sb.prep_ships_left()
 
             # Пауза.
-            sleep(0.8)
+            sleep(1.2)
         else:
             self.stats.game_active = False
             pygame.mouse.set_visible(True)
@@ -231,27 +261,520 @@ class AlienInvasion:
         # Проверить, добрались ли пришельцы до нижнего края экрана.
         self._check_aliens_bottom()
 
-
     def _create_fleet(self):
         """Создаёт флот пришельцев."""
-        # Создание пришельца и вычисление количества пришельцев в ряду.
-        # Интервал между соседними пришельцами равен ширине пришельца.
-        alien = Alien(self)
-        (alien_width, alien_height) = alien.rect.size
-        available_space_x = self.settings.screen_width  - (2 * alien_width)
-        number_aliens_x = available_space_x // (2 * alien_width)
-
-        """Определяет количество рядов, помещающихся на экране."""
-        ship_height = self.ship.rect.height
-        available_space_y = (self.settings.screen_height - 
+            # Создание пришельца и вычисление количества пришельцев в ряду.
+            # Интервал между соседними пришельцами равен ширине пришельца.
+        if self.stats.level <= 1:
+            # LEVEL 1
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (8 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (16 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 2:
+            # LEVEL 2
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (16 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 3:
+            # LEVEL 3
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (16 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 4:
+            # LEVEL 4
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (16 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 5:
+            # LEVEL 5 
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (16 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 6:
+            # LEVEL 6
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // ( 6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (14 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 7:
+            # LEVEL 7
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (14 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 8:
+            # LEVEL 8
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (14 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 9:
+            # LEVEL 9
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (14 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 10:
+            # LEVEL 10
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (12 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 11:
+            # LEVEL 11
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (12 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 12:
+            # LEVEL 12
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (12 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 13:
+            # LEVEL 13
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (12 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 14:
+            # LEVEL 14
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (10 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 15:
+            # LEVEL 15
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (10 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 16:
+            # LEVEL 16
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (10 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 17:
+            # LEVEL 17
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (10 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 18:
+            # LEVEL 18
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (8 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 19:
+            # LEVEL 19
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (8 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 20:
+            # LEVEL 20
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (8 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 21:
+            # LEVEL 21
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (8 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 22:
+            # LEVEL 22
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (6 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 23:
+            # LEVEL 23
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (6 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 24:
+            # LEVEL 24
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (6 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 25:
+            # LEVEL 25
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (6 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 26:
+            # LEVEL 26
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
             (4 * alien_height) - ship_height)
-        number_rows = available_space_y // (2 * alien_height)
-
-        # Создание флота вторжения.
-        for row_number in range(number_rows):
-            for alien_number in range(number_aliens_x):
-                self._create_alien(alien_number, row_number)
-                # alien_number на первом месте, row_number - на втором!
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 27:
+            # LEVEL 27
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (4 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 28:
+            # LEVEL 28
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (4 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 29:
+            # LEVEL 29
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (4 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 30:
+            # LEVEL 30
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (6 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (2 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 31:
+            # LEVEL 31
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (4 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (2 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 32:
+            # LEVEL 32
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (3 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (2 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        elif self.stats.level <= 33:
+            # LEVEL 33
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (2 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
+        else:
+            # LEVEL_infinity
+            alien = Alien(self)
+            (alien_width, alien_height) = alien.rect.size
+            available_space_x = self.settings.screen_width  - alien_width
+            number_aliens_x = available_space_x // (2 * alien_width)
+            """Определяет количество рядов, помещающихся на экране."""
+            ship_height = self.ship.rect.height
+            available_space_y = (self.settings.screen_height - 
+            (2 * alien_height) - ship_height)
+            number_rows = available_space_y // (2 * alien_height)
+            # Создание флота вторжения.
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number)
 
     def _create_alien(self, alien_number, row_number):
         """Создание пришельца и размещение его в ряду."""
