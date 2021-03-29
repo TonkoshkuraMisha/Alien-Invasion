@@ -7,9 +7,10 @@ from settings import Settings
 from game_stats import GameStats
 from scoreboard import Scoreboard
 from button import Button
+from info_button import Info_Button
 from ship import Ship
 from bullet import Bullet
-from alien_bullet import Alien_Bullet
+#from alien_bullet import Alien_Bullet
 from alien import Alien
 
 class AlienInvasion:
@@ -23,8 +24,8 @@ class AlienInvasion:
         self.button_play = pygame.mixer.Sound('sound/sound_play.wav')
         self.lost_ship = pygame.mixer.Sound('sound/lost_ship.mp3')
         # звук для движения вправо-влево.
-        self.flight_ship = pygame.mixer.Sound('sound/ultrafast-flare.wav')
-        pygame.mixer.music.load('sound/Carpenter-Brut-Escape-From-Midwich-Valley.mp3')
+        #self.flight_ship = pygame.mixer.Sound('sound/ultrafast-flare.wav')
+        pygame.mixer.music.load('sound/Carpenter-Brut-Escape-From-Midwich-Valley.wav')
         pygame.mixer.music.play(loops = -1)
         #pygame.mixer.music.load('sound/level_1.wav')
         #pygame.mixer.music.play(loops = 7)
@@ -42,7 +43,7 @@ class AlienInvasion:
         # (0, 0), pygame.FULLSCREEN) - вставить в set_mode
         # self.settings.screen_width = self.screen.get_rect().width
         # self.settings.screen_height = self.screen.get_rect().height
-        self.bg_img = pygame.image.load('images/backgraunds/start_game_1920_1200.jpg')
+        self.bg_img = pygame.image.load('images/6_DeepSpace.jpg')
         
         pygame.display.set_caption("Alien Invasion")
 
@@ -53,13 +54,30 @@ class AlienInvasion:
         self.ship = Ship(self)
         #self.alien = Alien(self)
         self.bullets = pygame.sprite.Group()
-        self.alien_bullets = pygame.sprite.Group()
+        #self.alien_bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
 
-        #self._create_fleet()
+        self._create_fleet()
 
         # Создание кнопки Play.
         self.play_button = Button(self, "Play")
+        
+        # Создание кнопки с информацией о миссии.
+        #self.info_button = Info_Button(self, "Earth is in danger again!")
+        #self.info_button = Info_Button(self, "Aliens!!!")
+        #self.info_button = Info_Button(self, "They are come our solar sistem!!!")
+        #self.info_button = Info_Button(self, "You are our the last hope!!!")
+        #self.info_button = Info_Button(self, "For attack the alien ships:")
+        #self.info_button = Info_Button(self, "key - Backspace.")
+        #self.info_button = Info_Button(self, "You have only 10 shots in a row!")
+        #self.info_button = Info_Button(self, "For move right or left:")
+        #self.info_button = Info_Button(self, "key - Right, Left.")
+        #self.info_button = Info_Button(self, "For exit game: key - Q.")
+        #self.info_button = Info_Button(self, "Don't let the aliens fly by you!!!")
+        #self.info_button = Info_Button(self, "We believe in you! ")
+        #self.info_button = Info_Button(self, "Ready to go! 7 ... 6 ... 5 ... 4 ...")
+        #self.info_button = Info_Button(self, "Attention! 3 ... 2 ... 1 ...")
+        #self.info_button = Info_Button(self, "Start!...")
 
     def run_game(self):
         """Запуск основного цикла игры."""
@@ -88,7 +106,6 @@ class AlienInvasion:
                 mouse_pos = pygame.mouse.get_pos()
                 self._check_play_button(mouse_pos)
                 self.button_play.play()
-                self._create_fleet()
 
     def _check_play_button(self, mouse_pos):
         """Запускает новую игру при нажатии кнопки Play."""
@@ -111,7 +128,7 @@ class AlienInvasion:
 
             # Указатель мыши скрывается.
             pygame.mouse.set_visible(False)
-            self.bg_img = pygame.image.load('images/backgraunds/Saturn_1920_1030.jpg')
+            self.bg_img = pygame.image.load('images/1_Earth.jpg')
 
             # Обновляются значения уровня и количества жизней перед началом
             # новой игры.
@@ -166,11 +183,11 @@ class AlienInvasion:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
-    def _fire_alien_bullet(self):
+    #def _fire_alien_bullet(self):
         """Создание нового снаряда пришельцев и включение его в группу alien_bullets"""
-        if len(self.alien_bullets) < self.settings.alien_bullets_allowed:
-            new_alien_bullet = Alien_Bullet(self)
-            self.alien_bullets.add(new_alien_bullet)
+        #if len(self.alien_bullets) < self.settings.alien_bullets_allowed:
+            #new_alien_bullet = Alien_Bullet(self)
+            #self.alien_bullets.add(new_alien_bullet)
 
     def _update_bullets(self):
         """Обновляет позиции снарядов и уничтожает старые снаряды."""
@@ -184,15 +201,15 @@ class AlienInvasion:
 
         self._check_bullet_alien_collisions()
 
-    def _update_alien_bullets(self):
+    #def _update_alien_bullets(self):
         """Обновляет позиции снарядов пришельцев и уничтожает старые."""
         # Обновление позиции снарядов пришельцев.
-        self.alien_bullets.update()
+        #self.alien_bullets.update()
 
         # Удаление снарядов, вышедших за край экрана.
-        for alien_bullet in self.alien_bullets.copy():
-            if alien_bullet.rect.bottom >= 1500:
-                self.alien_bullets.remove(alien_bullet)
+        #for alien_bullet in self.alien_bullets.copy():
+            #if alien_bullet.rect.bottom >= 1500:
+                #self.alien_bullets.remove(alien_bullet)
 
         #self._check_alien_bullet_ship_collisions()
 
@@ -211,19 +228,19 @@ class AlienInvasion:
         if not self.aliens:
             self.start_new_level()
 
-    def _check_alien_bullet_ship_collisions(self):
+    #def _check_alien_bullet_ship_collisions(self):
         """Обработка коллизий снарядов пришельцев с кораблём."""
         # Удаление снарядов пришельцев и корабля, учавствующих в коллизиях.
-        collisions = pygame.sprite.groupcollide(
-                self.alien_bullets, self.ship, True, True)
+        #collisions = pygame.sprite.groupcollide(
+                #self.alien_bullets, self.ship, True, True)
 
-        if collisions:
-            self._ship_hit()
+        #if collisions:
+            #self._ship_hit()
 
     def start_new_level(self):
         # Уничтожение существующих снарядов и создание нового флота.
 
-        #self.bullets.empty()
+        self.bullets.empty()
         #self.alien_bullets.empty()
         self._create_fleet()
         self.settings.increase_speed()
@@ -234,17 +251,19 @@ class AlienInvasion:
         self.sb.prep_level()
 
         # Замена фона на котором происходит сражение зависит от набранных очков.
-        # Бой постепенно приближается к орбите Земли. Можно сделать наоборот.
+        # Бой постепенно удаляется от орбиты Земли.
         if self.stats.score <= 20000:
-            self.bg_img = pygame.image.load('images/backgraunds/Saturn_1920_1030.jpg')
+            self.bg_img = pygame.image.load('images/1_Earth.jpg')
+        elif self.stats.score <= 450000:
+            self.bg_img = pygame.image.load('images/2_Mars.jpg')
+        elif self.stats.score <= 90000:
+            self.bg_img = pygame.image.load('images/3_Jupiter.jpg')
         elif self.stats.score <= 150000:
-            self.bg_img = pygame.image.load('images/backgraunds/Jupiter_1920_1080.jpg')
-        elif self.stats.score <= 300000:
-            self.bg_img = pygame.image.load('images/backgraunds/Mars_1920_1200.jpg')
-        elif self.stats.score <= 500000:
-            self.bg_img = pygame.image.load('images/backgraunds/Moon_1920_1317.jpg')
+            self.bg_img = pygame.image.load('images/4_Saturn.jpg')
+        elif self.stats.score <= 3000000:
+            self.bg_img = pygame.image.load('images/5_Pluton.jpg')
         else:
-            self.bg_img = pygame.image.load('images/backgraunds/Earth_1920_1080.jpg')
+            self.bg_img = pygame.image.load('images/6_DeepSpace.jpg')
 
 
     def _ship_hit(self):
@@ -258,7 +277,7 @@ class AlienInvasion:
             # Очистка списков пришельцев и снарядов.
             self.aliens.empty()
             self.bullets.empty()
-            self.alien_bullets.empty()
+            #self.alien_bullets.empty()
 
             # Создание нового флота и размещение корабля в центре.
             self._create_fleet()
@@ -295,8 +314,8 @@ class AlienInvasion:
             self._ship_hit()
 
         # Проверка коллизий "снаряд пришельца - корабль."
-        if pygame.sprite.spritecollideany(self.ship, self.alien_bullets):
-            self._ship_hit()
+        #if pygame.sprite.spritecollideany(self.ship, self.alien_bullets):
+            #self._ship_hit()
 
         # Проверить, добрались ли пришельцы до нижнего края экрана.
         self._check_aliens_bottom()
@@ -846,8 +865,8 @@ class AlienInvasion:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
-        for alien_bullet in self.alien_bullets.sprites():
-            alien_bullet.draw_alien_bullet()
+        #for alien_bullet in self.alien_bullets.sprites():
+            #alien_bullet.draw_alien_bullet()
 
         # Вывод информации о счёте.
         self.sb.show_score()
@@ -855,6 +874,7 @@ class AlienInvasion:
         # Кнопка Play отображается в том случае, если игра неактивна.
         if not self.stats.game_active:
             self.play_button.draw_button()
+            #self.info_button.draw_button_info()
         
         pygame.display.flip()
 

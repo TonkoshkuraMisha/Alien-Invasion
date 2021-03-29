@@ -1,0 +1,13 @@
+"Earth is in danger again!"+ 
+            "\nAliens!!!"+
+            "\nThey are come our solar sistem!!!"+
+            "\nYou are our the last hope!!!"+
+            "\nAttack the alien ships."+
+            "\n(key - Backspace)"+
+            "\nYou have only 10 shots in a row!"+
+            "\nMove right or left"+
+            "\n(key - Right, Left)."+
+            "\nDon't let the aliens fly by you!!!"+
+            "\nReady to go! 7 ... 6 ... 5 ... 4 ..."+
+            "\nAttention! 3 ... 2 ... 1 ..."+
+            "\nStart!...")
