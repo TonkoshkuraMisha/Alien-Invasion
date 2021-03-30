@@ -52,6 +52,6 @@ class Settings():
         self.bullet_speed *= self.speedup_scale_2
         self.alien_speed *= self.speedup_scale
         #self.alien_bullet_speed *= self.speedup_scale
-        self.fleet_drop_speed *= self.speedup_scale
+        self.fleet_drop_speed *= self.speedup_scale_2
 
         self.alien_points = int(self.alien_points * self.speedup_scale_2)

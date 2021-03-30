@@ -2,6 +2,7 @@ import sys
 from time import sleep
 
 import pygame
+FPS = 60
 
 from settings import Settings
 from game_stats import GameStats
@@ -25,7 +26,7 @@ class AlienInvasion:
         self.lost_ship = pygame.mixer.Sound('sound/lost_ship.mp3')
         # звук для движения вправо-влево.
         #self.flight_ship = pygame.mixer.Sound('sound/ultrafast-flare.wav')
-        pygame.mixer.music.load('sound/Carpenter-Brut-Escape-From-Midwich-Valley.wav')
+        pygame.mixer.music.load('sound/Carpenter_Brut_Escape_From_Midwich_Valley.wav')
         pygame.mixer.music.play(loops = -1)
         #pygame.mixer.music.load('sound/level_1.wav')
         #pygame.mixer.music.play(loops = 7)
@@ -252,15 +253,15 @@ class AlienInvasion:
 
         # Замена фона на котором происходит сражение зависит от набранных очков.
         # Бой постепенно удаляется от орбиты Земли.
-        if self.stats.score <= 20000:
+        if self.stats.score <= 5000:
             self.bg_img = pygame.image.load('images/1_Earth.jpg')
-        elif self.stats.score <= 450000:
+        elif self.stats.score <= 15000:
             self.bg_img = pygame.image.load('images/2_Mars.jpg')
-        elif self.stats.score <= 90000:
+        elif self.stats.score <= 25000:
             self.bg_img = pygame.image.load('images/3_Jupiter.jpg')
-        elif self.stats.score <= 150000:
+        elif self.stats.score <= 35000:
             self.bg_img = pygame.image.load('images/4_Saturn.jpg')
-        elif self.stats.score <= 3000000:
+        elif self.stats.score <= 50000:
             self.bg_img = pygame.image.load('images/5_Pluton.jpg')
         else:
             self.bg_img = pygame.image.load('images/6_DeepSpace.jpg')
